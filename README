@@ -1,0 +1,8 @@
+This is a demo of a scheduler bpf program.
+
+It allows to load, attach and pin bpf scheduler programs.
+
+To build, please, specify the path to the patched linux kernel tree at the top
+of the Makefile.
+
+Then run $ ./atc --help for available commands/options.
