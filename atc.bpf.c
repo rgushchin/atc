@@ -59,43 +59,6 @@ int BPF_PROG(wakeup, struct task_struct *curr, struct task_struct *p)
 	return ret;
 }
 
-SEC("sched/cfs_check_preempt_tick")
-int BPF_PROG(tick, struct sched_entity *curr, unsigned long delta_exec)
-{
-	unsigned long tgidpid1;
-	int ret = 0;
-
-	if (delta_exec > max_exec_slice)
-		return 0;
-
-	if (allret)
-		return allret;
-
-	if (curr == NULL)
-		return 0;
-
-	/* pid/tgid mode */
-	if (tgidpid) {
-		tgidpid1 = bpf_sched_entity_to_tgidpid(curr);
-
-		if ((tgidpid1 & tgidpid) == tgidpid)
-			ret = -1;
-
-		if (ret)
-			debug("tick tgid %d pid %d ret %d", tgidpid1 >> 32,
-				   tgidpid1 & 0xFFFFFFFF, ret);
-
-	/* cgroup id mode */
-	} else if (cgid) {
-		if (bpf_sched_entity_belongs_to_cgrp(curr, cgid)) {
-			ret = -1;
-			debug("tick cg %lu %d", bpf_sched_entity_to_cgrpid(curr), ret);
-		}
-	}
-
-	return ret;
-}
-
 SEC("sched/cfs_wakeup_preempt_entity")
 int BPF_PROG(preempt_entity, struct sched_entity *curr, struct sched_entity *se)
 {
@@ -138,6 +101,43 @@ int BPF_PROG(preempt_entity, struct sched_entity *curr, struct sched_entity *se)
 			debug("entity cg %lu", bpf_sched_entity_to_cgrpid(curr));
 			debug("entity cg %lu", bpf_sched_entity_to_cgrpid(se));
 			debug("entity cg %d", ret);
+		}
+	}
+
+	return ret;
+}
+
+SEC("sched/cfs_check_preempt_tick")
+int BPF_PROG(tick, struct sched_entity *curr, unsigned long delta_exec)
+{
+	unsigned long tgidpid1;
+	int ret = 0;
+
+	if (delta_exec > max_exec_slice)
+		return 0;
+
+	if (allret)
+		return allret;
+
+	if (curr == NULL)
+		return 0;
+
+	/* pid/tgid mode */
+	if (tgidpid) {
+		tgidpid1 = bpf_sched_entity_to_tgidpid(curr);
+
+		if ((tgidpid1 & tgidpid) == tgidpid)
+			ret = -1;
+
+		if (ret)
+			debug("tick tgid %d pid %d ret %d", tgidpid1 >> 32,
+				   tgidpid1 & 0xFFFFFFFF, ret);
+
+	/* cgroup id mode */
+	} else if (cgid) {
+		if (bpf_sched_entity_belongs_to_cgrp(curr, cgid)) {
+			ret = -1;
+			debug("tick cg %lu %d", bpf_sched_entity_to_cgrpid(curr), ret);
 		}
 	}
 
