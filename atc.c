@@ -39,6 +39,7 @@ int main(int argc, char **argv)
 	struct atc_bpf *skel;
 	int pid = 0, tgid = 0, child = 0, allret = 0, keep = 0, reset = 0;
 	unsigned long cgid = 0;
+	unsigned long ts = 100000000; // 100 milliseconds
 	char msg[128] = {0};
 	int err, i;
 
@@ -74,6 +75,15 @@ int main(int argc, char **argv)
 				goto usage;
 			tgid = atoi(argv[i]);
 			snprintf(msg, sizeof(msg), "prioritize task with tgid %d", tgid);
+		} else if (!strcmp(argv[i], "ts") || !strcmp(argv[i], "-s")) {
+			if (i++ == argc)
+				goto usage;
+			ts = atol(argv[i]) * 1000000;
+
+			if (ts > 1000000000)
+				ts = 1000000000;
+			if (ts < 1000000)
+				ts = 1000000;
 		} else if (!strcmp(argv[i], "all") || !strcmp(argv[i], "-a")) {
 			if (i++ == argc)
 				goto usage;
@@ -128,6 +138,7 @@ int main(int argc, char **argv)
 	skel->bss->tgidpid = (unsigned long)tgid << 32 | pid;
 	skel->bss->cgid = cgid;
 	skel->bss->allret = allret;
+	skel->bss->max_exec_slice = ts;
 
 	err = atc_bpf__load(skel);
 	if (err) {
@@ -177,6 +188,7 @@ usage:
 		"\ttgid, -t <tgid>: prioritize task(s) with tgid <tgid>\n"
 		"\tcgroup, -g <path/cgid>: prioritize task(s) within cgroup with <path/cgid>\n"
 		"\tall, -a <ret>: suppress all non-voluntary context switches\n"
+		"\tts, -s <timeslice>: max timeslice in milliseconds [1..1000]\n"
 		"\tkeep, -k: keep programs loaded and attached using bpffs\n"
 		"\treset, -r: delete all sched_ programs from bpffs\n"
 		"\thelp, -h, -?: print this message\n", argv[0]);

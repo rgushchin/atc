@@ -9,6 +9,7 @@ char LICENSE[] SEC("license") = "Dual BSD/GPL";
 unsigned long tgidpid = 0;
 unsigned long cgid = 0;
 unsigned long allret = 0;
+unsigned long max_exec_slice = 0;
 
 #define INVALID_RET ((unsigned long) -1L)
 
@@ -63,6 +64,9 @@ int BPF_PROG(tick, struct sched_entity *curr, unsigned long delta_exec)
 {
 	unsigned long tgidpid1;
 	int ret = 0;
+
+	if (delta_exec > max_exec_slice)
+		return 0;
 
 	if (allret)
 		return allret;
