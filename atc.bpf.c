@@ -48,6 +48,9 @@ int BPF_PROG(wakeup, struct task_struct *curr, struct task_struct *p)
 			ret = 1;
 
 		if (ret) {
+			tgidpid1 = (unsigned long)curr->tgid << 32 | curr->pid;
+			tgidpid2 = (unsigned long)p->tgid << 32 | p->pid;
+
 			debug("wakeup1 tgid %d pid %d", tgidpid1 >> 32,
 				   tgidpid1 & 0xFFFFFFFF);
 			debug("wakeup2 tgid %d pid %d", tgidpid2 >> 32,
