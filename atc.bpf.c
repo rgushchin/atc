@@ -35,9 +35,9 @@ int BPF_PROG(wakeup, struct task_struct *curr, struct task_struct *p)
 			ret = 1;
 
 		if (ret) {
-			debug("wakeup1 tgid %d pid %d", tgidpid1 >> 32,
+			debug("wakeup1 tgid %u pid %u", tgidpid1 >> 32,
 				   tgidpid1 & 0xFFFFFFFF);
-			debug("wakeup2 tgid %d pid %d", tgidpid2 >> 32,
+			debug("wakeup2 tgid %u pid %u", tgidpid2 >> 32,
 				   tgidpid2 & 0xFFFFFFFF);
 			debug("wakeup ret %d", ret);
 		}
@@ -51,9 +51,9 @@ int BPF_PROG(wakeup, struct task_struct *curr, struct task_struct *p)
 			tgidpid1 = (unsigned long)curr->tgid << 32 | curr->pid;
 			tgidpid2 = (unsigned long)p->tgid << 32 | p->pid;
 
-			debug("wakeup1 tgid %d pid %d", tgidpid1 >> 32,
+			debug("wakeup1 tgid %u pid %u", tgidpid1 >> 32,
 				   tgidpid1 & 0xFFFFFFFF);
-			debug("wakeup2 tgid %d pid %d", tgidpid2 >> 32,
+			debug("wakeup2 tgid %u pid %u", tgidpid2 >> 32,
 				   tgidpid2 & 0xFFFFFFFF);
 			debug("wakeup ret %d", ret);
 		}
@@ -86,9 +86,9 @@ int BPF_PROG(preempt_entity, struct sched_entity *curr, struct sched_entity *se)
 			ret = 1;
 
 		if (ret) {
-			debug("entity1 tgid %d pid %d", tgidpid1 >> 32,
+			debug("entity1 tgid %u pid %u", tgidpid1 >> 32,
 				   tgidpid1 & 0xFFFFFFFF);
-			debug("entity2 tgid %d pid %d", tgidpid2 >> 32,
+			debug("entity2 tgid %u pid %u", tgidpid2 >> 32,
 				   tgidpid2 & 0xFFFFFFFF);
 			debug("entity ret %d", ret);
 		}
@@ -133,7 +133,7 @@ int BPF_PROG(tick, struct sched_entity *curr, unsigned long delta_exec)
 			ret = -1;
 
 		if (ret)
-			debug("tick tgid %d pid %d ret %d", tgidpid1 >> 32,
+			debug("tick tgid %u pid %u ret %d", tgidpid1 >> 32,
 				   tgidpid1 & 0xFFFFFFFF, ret);
 
 	/* cgroup id mode */
